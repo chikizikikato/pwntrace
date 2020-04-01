@@ -35,14 +35,32 @@ class TraceCall():
     
     
 class HeapChunk():
+  def equal_with_call(self, call):
+    return bool(self.address == call.function_arguments[0])
+                              
+class MollacedHeapChunk(HeapChunk):
   def __init__(self, address, size):
     self.address = address
     self.size = size
-    
-  def equal_with_call(self, call):
-    return bool(self.address == call.function_arguments[0])
-    
+                              
+  @classmethod
+  def from_malloced_chunk(cls, malloced_chunk):
+    return cls(malloced_chunk.address)
+                              
   @classmethod
   def from_trace_call(cls, trace_call):
     return cls(trace_call.return_value, trace_call.function_arguments[0])
-    
+                              
+class FreedHeapChunk(HeapChunk):
+  def __init__(self, address):
+    self.address = address
+                              
+  @classmethod
+  def from_malloced_chunk(cls, malloced_chunk):
+    return cls(malloced_chunk.address)
+  
+  @classmethod
+  def from_trace_call(cls, trace_call):
+    return cls(trace_call.return_value)
+  
+
