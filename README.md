@@ -1,2 +1,2 @@
 # titrace
-Use ltrace with pwnlib.tubes.process instances, useful for heap exploitation
+Trace system and library calls using strace and ltrace.
