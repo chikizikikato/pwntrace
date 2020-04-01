@@ -81,10 +81,10 @@ class TraceCallsParser():
 
    
 class LTracer(Tracer):
-	subprocess_handler_class = subprocess_handler.LTraceSubprocessHandler
+  subprocess_handler_class = subprocess_handler.LTraceSubprocessHandler
   
 class HeapTracer(Tracer):
-	subprocess_handler_class = subprocess_handler.HeapTraceSubprocessHandler
+  subprocess_handler_class = subprocess_handler.HeapTraceSubprocessHandler
 
   def print_malloced_chunks(self):
     trace_printer.MallocedChunksPrinter.print_malloced_chunks(self.trace_calls_parser.malloced_chunks)
@@ -93,4 +93,4 @@ class HeapTracer(Tracer):
     trace_printer.FreedChunksPrinter.print_freed_chunks(self.trace_calls_parser.freed_chunks)
 
 class STracer(Tracer):
-	subprocess_handler_class = subprocess_handler.STraceSubprocessHandler'
+  subprocess_handler_class = subprocess_handler.STraceSubprocessHandler'
