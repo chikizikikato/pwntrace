@@ -34,16 +34,16 @@ class SubprocessHandler():
     
     
 class LTracerSubprocessHandler(SubprocessHandler):
-	function_list_builder_class = function_list_builder.LTraceFunctionListBuilder
+  function_list_builder_class = function_list_builder.LTraceFunctionListBuilder
   trace_reciever_class = trace_reciever.LTraceReciever
   process_spawn_format = 'ltrace -e "{func_list_string}" -o {filename} {argv}'
   
 class HeapTracerSubprocessHandler(SubprocessHandler):
-	function_list_builder_class = function_list_builder.HeapTraceFunctionListBuilder
+  function_list_builder_class = function_list_builder.HeapTraceFunctionListBuilder
   trace_reciever_class = trace_reciever.HeapTraceReciever
   process_spawn_format = 'ltrace -e "{func_list_string}" -o {filename} {argv}'
 
 class STracerSubprocessHandler(SubprocessHandler):
-	function_list_builder_class = function_list_builder.STraceFunctionListBuilder
+  function_list_builder_class = function_list_builder.STraceFunctionListBuilder
   trace_reciever_class = trace_reciever.STraceReciever
   process_spawn_format = 'strace -e "{func_list_string}" -o {filename} {argv}'
