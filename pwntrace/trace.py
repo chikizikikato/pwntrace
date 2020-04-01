@@ -1,4 +1,4 @@
-import trace_reciever
+import subprocess_handler
 import trace_call
 import trace_printer
 import trace_utils
@@ -46,32 +46,51 @@ class TraceCallsParser():
     self.trace_calls.append(call)
     
   def _parse_malloc(self, call):
-	  if(call.return_value in self.freed_chunks):
-		  self.freed_chunks.remove(call.return_value)
-		self.malloced_chunks.append(trace_call.HeapChunk.from_call(call))
+    fake_freed_chunk = trace_call.FreedHeapChunk.from_trace_call(call)
+	  if(fake_freed_chunk in self.freed_chunks):
+		  self.freed_chunks.remove(fake_freed_chunk)
+		self.malloced_chunks.append(trace_call.MallocedHeapChunk.from_call(call))
     
   def _parse_free(self, call):
-    for chunk in self.malloced_chunks:
-      if(chunk.equal_with_call(call)):
-        self.malloced_chunks.remove(chunk)
-        self.freed_chunks.append(chunk.address)
+    for malloced_chunk in self.malloced_chunks:
+      if(malloced_chunk.equal_with_call(call)):
+        self.malloced_chunks.remove(malloced_chunk)
+        self.freed_chunks.append(trace_call.FreedHeapChunk.from_malloced_chunk(malloed_chunk))
         break
 
+     
     
+    
+ class Tracer():
+  def __init__(self, subprocess_handler, trace_calls_parser=None):
+    self.subprocess_handler = subprocess_handler
+    self.trace_calls_parser = (trace_calls_parser if(isinstance(trace_calls_parser, TraceCallsParser)) else TraceCallsParser())
+    
+  def print_trace(self):
+    trace_printer.TracePrinter.print_trace(self.trace_calls_parser.trace_calls)
+    
+  def parse_new_trace_calls(self):
+    latest_trace_output = self.subprocess_handler.trace_reciever.get_latest_trace_output()
+    self.trace_calls_parser.parse_trace_output(latest_trace_output)
+    
+  @classmethod
+  def bind_tracer_to_process(cls, argv, functions, env=None, shell=False, **kwargs):
+    subprocess_handler = cls.subprocess_handler_class(argv, functions, env=env, shell=shell, kwargs)
+    return cls(subprocess_handler)
     
   
     
- class Tracer():
-  def __init__(self, trace_reciever, trace_calls_parser=None):
-    if(not issubclass(trace_reciever, trace_reciever.TraceReciever)):
-      raise TypeError('trace_reciever has to a subclass from {0}'.format(str(trace_reciever.TraceReciever)))
-    self.trace_reciever = trace_reciever
-    self.trace_calls_parser = (trace_calls_parser if(isinstance(trace_calls_parser, TraceCallsParser)) else TraceParser())
+class LTracer(Tracer):
+	subprocess_handler_class = subprocess_handler.LTraceSubprocessHandler
+  
+class HeapTracer(Tracer):
+	subprocess_handler_class = subprocess_handler.HeapTraceSubprocessHandler
+  
+  def print_malloced_chunks(self):
+    trace_printer.MallocedChunksPrinter.print_malloced_chunks(self.trace_calls_parser.malloced_chunks)
     
-  def print_trace(self):
-    trace_printer.TracePrinter().print_trace(self.trace_calls_parser.trace_calls)
-    
-  def parse_new_trace_calls(self):
-    latest_trace_output = self.trace_reciever.get_latest_fifo_output()
-    self.trace_calls_parser.parse_trace_output(latest_trace_output)
-    
+  def print_freed_chunks(self):
+    trace_printer.FreedChunksPrinter.print_freed_chunks(self.trace_calls_parser.freed_chunks)
+
+class STracer(Tracer):
+	subprocess_handler_class = subprocess_handler.STraceSubprocessHandler'
